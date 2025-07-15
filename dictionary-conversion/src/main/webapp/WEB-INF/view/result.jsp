@@ -12,10 +12,10 @@
   <c:when test="${not empty result}">
     <p>Nghĩa tiếng Việt: <b>${result}</b></p>
   </c:when>
-  <c:otherwise>
-    <p style="color:red">Không tìm thấy từ trong từ điển!</p>
-  </c:otherwise>
 </c:choose>
+<c:if test="${not empty message}">
+  <p style="color:red">${message}</p>
+</c:if>
 <a href="/translate">Quay lại</a>
 </body>
 </html>

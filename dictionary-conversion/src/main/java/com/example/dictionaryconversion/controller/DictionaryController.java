@@ -24,6 +24,11 @@ public class DictionaryController {
         String result = dictionaryService.translate(word);
         model.addAttribute("word", word);
         model.addAttribute("result", result);
+        if (result == null || result.isEmpty()) {
+            model.addAttribute("message", "Không tìm thấy từ '" + word + "' trong từ điển. Vui lòng thử lại!");
+        } else {
+            model.addAttribute("message", "");
+        }
         return "result";
     }
 }
