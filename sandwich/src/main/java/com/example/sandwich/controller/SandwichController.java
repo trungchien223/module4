@@ -25,6 +25,11 @@ public class SandwichController {
 
     @PostMapping("/save")
     public String save(@RequestParam(value = "condiment", required = false) String[] condiment, Model model) {
+        if (condiment==null||condiment.length==0){
+            model.addAttribute("error","bạn cần chọn ít nhất 1");
+            model.addAttribute("condiments",condimentService.findAll());
+            return "form";
+        }
         model.addAttribute("selectedCondiments", condiment);
         return "result";
     }
