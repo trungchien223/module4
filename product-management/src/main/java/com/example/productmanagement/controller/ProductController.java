@@ -30,7 +30,6 @@ public class ProductController {
     }
     @PostMapping("/save")
     public String save(Product product, RedirectAttributes redirectAttributes) {
-        //product.setId((int)(Math.random()*1000));
         productService.save(product);
         redirectAttributes.addFlashAttribute("message", "Product has been saved successfully");
         return "redirect:/products";
@@ -75,7 +74,7 @@ public class ProductController {
             return "redirect:/products";
         }
         model.addAttribute("product", product);
-        return "detail";
+        return "view";
     }
     @GetMapping("/search")
     public String search(@RequestParam String keyword, Model model) {

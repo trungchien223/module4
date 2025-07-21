@@ -50,7 +50,7 @@
     <td th:text="${product.description}"></td>
     <td th:text="${product.manufacturer}"></td>
     <td class="text-center">
-      <a th:href="@{'/products/' + ${product.id} + '/view'}" class="btn btn-info btn-sm me-1">Xem</a>
+      <a th:href="@{'/products/' + ${product.id} + '/detail'}" class="btn btn-info btn-sm me-1">Xem</a>
       <a th:href="@{'/products/' + ${product.id} + '/edit'}" class="btn btn-warning btn-sm me-1">Sửa</a>
 
       <!-- Nút mở modal xoá -->
