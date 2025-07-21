@@ -54,33 +54,8 @@
       <a th:href="@{'/products/' + ${product.id} + '/edit'}" class="btn btn-warning btn-sm me-1">Sửa</a>
 
       <!-- Nút mở modal xoá -->
-      <button type="button" class="btn btn-danger btn-sm"
-              th:data-bs-toggle="'modal'"
-              th:data-bs-target="'#deleteModal' + ${product.id}">Xoá</button>
-
-      <!-- Modal xác nhận xoá -->
-      <div class="modal fade"
-           th:id="'deleteModal' + ${product.id}"
-           tabindex="-1"
-           aria-labelledby="deleteModalLabel"
-           aria-hidden="true">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title">Xác nhận xoá</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
-            </div>
-            <div class="modal-body">
-              Bạn có chắc chắn muốn xoá sản phẩm <strong th:text="${product.name}"></strong> không?
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Huỷ</button>
-              <a th:href="@{/products/{id}/delete(id=${product.id})}" class="btn btn-danger">Xoá</a>
-            </div>
-          </div>
-        </div>
-      </div>
-
+      <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal"
+              th:attr="data-product-id=${product.id},data-product-name=${product.name}">Xoá</button>
     </td>
   </tr>
   <tr th:if="${products.size() == 0}">
@@ -89,8 +64,37 @@
   </tbody>
 </table>
 
+<!-- Modal xác nhận xoá -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Xác nhận xoá</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+      </div>
+      <div class="modal-body">
+        Bạn có chắc chắn muốn xoá sản phẩm <strong id="deleteProductName"></strong> không?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Huỷ</button>
+        <a id="confirmDeleteBtn" href="#" class="btn btn-danger">Xoá</a>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Script Bootstrap -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  var deleteModal = document.getElementById('deleteModal');
+  deleteModal.addEventListener('show.bs.modal', function (event) {
+    var button = event.relatedTarget;
+    var productId = button.getAttribute('data-product-id');
+    var productName = button.getAttribute('data-product-name');
+    document.getElementById('deleteProductName').textContent = productName;
+    document.getElementById('confirmDeleteBtn').href = '/products/' + productId + '/delete';
+  });
+</script>
 
 </body>
 </html>
