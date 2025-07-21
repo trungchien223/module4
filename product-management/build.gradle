@@ -38,7 +38,6 @@ dependencies {
 
 // https://mvnrepository.com/artifact/com.mysql/mysql-connector-j
   implementation("com.mysql:mysql-connector-j:8.3.0")
-  implementation 'org.springframework:spring-tx:5.3.30'
 
   testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
   testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")

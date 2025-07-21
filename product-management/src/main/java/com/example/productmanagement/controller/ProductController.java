@@ -35,24 +35,19 @@ public class ProductController {
         return "redirect:/products";
     }
     @GetMapping("/{id}/edit")
-    public String edit(@PathVariable int id, Model model,RedirectAttributes redirectAttributes) {
+    public String edit(@PathVariable int id, Model model, RedirectAttributes redirectAttributes) {
         Product product = productService.findById(id);
         if (product == null) {
-            redirectAttributes.addFlashAttribute("error", "Product not found");
+            redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy sản phẩm!");
             return "redirect:/products";
         }
         model.addAttribute("product", product);
         return "edit";
     }
-    @PostMapping("/edit")
-    public String edit(Product product, RedirectAttributes redirectAttributes) {
-        Product existingProduct = productService.findById(product.getId());
-        if (existingProduct == null) {
-            redirectAttributes.addFlashAttribute("error", "Product not found");
-            return "redirect:/products";
-        }
+    @PostMapping("/update")
+    public String update(Product product, RedirectAttributes redirectAttributes) {
         productService.update(product.getId(), product);
-        redirectAttributes.addFlashAttribute("message", "Product has been updated successfully");
+        redirectAttributes.addFlashAttribute("successMessage", "Cập nhật sản phẩm thành công!");
         return "redirect:/products";
     }
     @PostMapping("/{id}/delete")
@@ -88,12 +83,6 @@ public class ProductController {
         model.addAttribute("products", products);
         model.addAttribute("keyword", keyword);
         return "list";
-    }
-
-    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public String handleTypeMismatchException(RedirectAttributes redirectAttributes) {
-        redirectAttributes.addFlashAttribute("errorMessage", "ID sản phẩm không hợp lệ!");
-        return "redirect:/products";
     }
 }
 
