@@ -2,6 +2,8 @@ package com.example.blog.service;
 
 import com.example.blog.model.Blog;
 import com.example.blog.repository.IBlogRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -34,4 +36,19 @@ public class BlogService implements IBlogService{
     public void delete(Long id) {
         blogRepository.deleteById(id);
     }
+
+    @Override
+    public Page<Blog> findAll(Pageable pageable) {
+        return blogRepository.findAll(pageable);
+    }
+
+    @Override
+    public Page<Blog> searchByTitle(String category,String title, Pageable pageable) {
+        return blogRepository.search(category,title, pageable);
+    }
+
+//    @Override
+//    public Page<Blog> searchByTitleAndCategory(String keyword, Long categoryId, Pageable pageable) {
+//        return blogRepository.findByTitleContainingIgnoreCaseAndCategory_Id(keyword, categoryId, pageable);
+//    }
 }

@@ -7,12 +7,14 @@
 <body class="container mt-4">
 <h2 class="mb-3" th:text="${blog.title}">Tiêu đề</h2>
 <p class="text-muted" th:text="${#temporals.format(blog.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2025</p>
+
+<p><strong>Danh mục:</strong> <span th:text="${blog.category.name}">Tên danh mục</span></p>
+
 <div class="border rounded p-3">
   <p th:utext="${#strings.replace(blog.content, '\n', '<br/>')}"
      style="word-wrap: break-word; overflow-wrap: break-word;">
   </p>
 </div>
-
 <div class="mt-4">
   <a class="btn btn-warning" th:href="@{/blogs/{id}/edit(id=${blog.id})}">Sửa</a>
   <form th:action="@{/blogs/{id}/delete(id=${blog.id})}" method="post" style="display:inline;">
