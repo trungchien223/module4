@@ -8,10 +8,16 @@
 
 <h2 class="mb-4">Danh sách bài viết</h2>
 
+<!-- Thông báo -->
+<div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
+    <span th:text="${message}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+
 <a class="btn btn-primary mb-3" th:href="@{/blogs/new}">+ Viết bài mới</a>
 
 <div class="list-group">
-    <div class="list-group-item" th:each="blog : ${blogs}">
+    <div class="list-group-item mb-2" th:each="blog : ${blogs}">
         <h5 th:text="${blog.title}">Tiêu đề</h5>
         <p class="text-muted" th:text="${#temporals.format(blog.createdAt, 'dd/MM/yyyy HH:mm')}">Ngày tạo</p>
         <p th:text="${#strings.abbreviate(blog.content, 150)}">Tóm tắt nội dung</p>
@@ -19,53 +25,47 @@
         <div>
             <a class="btn btn-sm btn-info" th:href="@{/blogs/{id}(id=${blog.id})}">Xem chi tiết</a>
             <a class="btn btn-sm btn-warning" th:href="@{/blogs/{id}/edit(id=${blog.id})}">Sửa</a>
-            <button class="btn btn-sm btn-danger"
-                    data-bs-toggle="modal"
-                    data-bs-target="#deleteModal"
-                    th:attr="data-id=${blog.id}, data-title=${blog.title}">
-                Xóa
-            </button>
+            <!-- Nút xóa sẽ mở modal -->
+            <button class="btn btn-sm btn-danger" data-bs-toggle="modal" th:data-bs-target="${'#deleteModal_' + blog.id}">Xóa</button>
         </div>
     </div>
 </div>
 
-<!-- MODAL XÓA -->
-<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-
-            <div class="modal-header">
-                <h5 class="modal-title" id="deleteModalLabel">Xác nhận xóa</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+<!-- Modal xác nhận xóa -->
+<div th:each="blog : ${blogs}">
+    <div class="modal fade" th:id="${'deleteModal_' + blog.id}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Xác nhận xóa</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body">
+                    Bạn có chắc chắn muốn xóa bài "<span th:text="${blog.title}"></span>" không?
+                </div>
+                <div class="modal-footer">
+                    <form th:action="@{/blogs/{id}/delete(id=${blog.id})}" method="post">
+                        <button type="submit" class="btn btn-danger">Xác nhận xóa</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    </form>
+                </div>
             </div>
-
-            <div class="modal-body">
-                Bạn có chắc chắn muốn xóa bài viết <strong id="blogTitle">...</strong>?
-            </div>
-
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                <form id="deleteForm" method="post">
-                    <button type="submit" class="btn btn-danger">Xóa</button>
-                </form>
-            </div>
-
         </div>
     </div>
 </div>
 
-<!-- JS Bootstrap + Script Modal -->
+<!-- Script Bootstrap -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    const deleteModal = document.getElementById('deleteModal');
-    deleteModal.addEventListener('show.bs.modal', function (event) {
-        const button = event.relatedTarget;
-        const blogId = button.getAttribute('data-id');
-        const blogTitle = button.getAttribute('data-title');
 
-        document.getElementById('blogTitle').textContent = blogTitle;
-        document.getElementById('deleteForm').setAttribute('action', `/blogs/${blogId}/delete`);
-    });
+<!-- Tự động ẩn thông báo -->
+<script>
+    setTimeout(function () {
+        let alert = document.querySelector(".alert");
+        if (alert) {
+            alert.classList.remove("show");
+            alert.classList.add("fade");
+        }
+    }, 3000);
 </script>
 
 </body>
