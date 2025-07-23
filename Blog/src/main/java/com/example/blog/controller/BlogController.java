@@ -11,6 +11,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Controller
@@ -34,13 +36,16 @@ public class BlogController {
         Pageable pageable = PageRequest.of(page, size, sort);
 
         Page<Blog> blogPage = blogService.searchByTitle(category, title, pageable);
-
+        if (blogPage.isEmpty()) {
+            model.addAttribute("message", "Không tìm thấy bài viết nào phù hợp.");
+        }
         model.addAttribute("blogs", blogPage);
         model.addAttribute("category", category);
         model.addAttribute("title", title);
         model.addAttribute("categories", categoryService.findAll());
         return "list";
     }
+
 
 
 //    @GetMapping
