@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Danh sách</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="container mt-5">
+<h1 class="mb-4 text-center">📚 Thư viện - Danh sách</h1>
+
+<div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+<div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+<table class="table table-bordered table-hover">
+  <thead class="table-dark">
+  <tr>
+    <th>STT</th>
+    <th>Tên sách</th>
+    <th>Số lượng còn</th>
+    <th>Hành động</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr th:each="book, iterStat : ${books}">
+    <td th:text="${iterStat.index + 1}"></td>
+    <td th:text="${book.title}"></td>
+    <td th:text="${book.quantity}"></td>
+    <td>
+      <form th:action="@{/books/{id}/borrow(id=${book.id})}" method="post" th:if="${book.quantity > 0}">
+        <button type="submit" class="btn btn-primary btn-sm">Mượn</button>
+      </form>
+      <span th:if="${book.quantity == 0}" class="text-danger">Hết sách</span>
+    </td>
+  </tr>
+  </tbody>
+</table>
+
+<div class="text-center mt-4">
+  <a href="/return" class="btn btn-success">Trả sách</a>
+</div>
+</body>
+</html>
