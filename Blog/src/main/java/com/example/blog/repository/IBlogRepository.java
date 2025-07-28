@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface IBlogRepository extends JpaRepository<Blog, Long> {
     @Query("SELECT b FROM Blog b WHERE "
@@ -16,5 +18,7 @@ public interface IBlogRepository extends JpaRepository<Blog, Long> {
     Page<Blog> search(@Param("category") String category,
                       @Param("title") String title,
                       Pageable pageable);
+    List<Blog> findByCategoryId(Long categoryId);
+
 }
 

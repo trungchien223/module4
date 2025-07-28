@@ -11,8 +11,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Controller
@@ -45,8 +43,6 @@ public class BlogController {
         model.addAttribute("categories", categoryService.findAll());
         return "list";
     }
-
-
 
 //    @GetMapping
 //    public String listBlogs(Model model) {
