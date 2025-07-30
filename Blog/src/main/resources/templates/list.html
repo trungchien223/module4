@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Danh sách Blog</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body class="container mt-4">
 
@@ -15,7 +16,18 @@
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
 
-<!-- Form tìm kiếm và lọc -->
+<!-- Form tìm kiếm AJAX -->
+<div class="row g-3 mb-4">
+    <div class="col-md-8">
+        <label class="form-label">Tìm kiếm bài viết</label>
+        <input type="text" id="searchInput" class="form-control" placeholder="Nhập từ khóa tìm kiếm...">
+    </div>
+    <div class="col-md-4 d-flex align-items-end">
+        <button id="searchBtn" class="btn btn-primary w-100">Tìm kiếm</button>
+    </div>
+</div>
+
+<!-- Form tìm kiếm và lọc cũ (giữ lại để tương thích) -->
 <form class="row g-3 mb-4" method="get" th:action="@{/blogs}">
     <!-- Lọc danh mục -->
     <div class="col-md-4">
@@ -47,63 +59,77 @@
 <a class="btn btn-success mb-3" th:href="@{/blogs/new}">+ Viết bài mới</a>
 
 <!-- Danh sách bài viết -->
-<div th:if="${blogs.content.size() > 0}">
-    <div class="list-group">
-        <div class="list-group-item mb-3" th:each="blog : ${blogs.content}">
-            <h5 th:text="${blog.title}">Tiêu đề</h5>
-            <p class="text-muted" th:text="${#temporals.format(blog.createdAt, 'dd/MM/yyyy HH:mm')}">Ngày tạo</p>
-            <p>
-                <strong>Danh mục:</strong>
-                <span th:text="${blog.category.name}">Tên danh mục</span>
-            </p>
-            <p th:text="${#strings.abbreviate(blog.content, 150)}">Tóm tắt nội dung</p>
+<div id="blogList">
+    <div th:if="${blogs.content.size() > 0}">
+        <div class="list-group">
+            <div class="list-group-item mb-3" th:each="blog : ${blogs.content}">
+                <h5 th:text="${blog.title}">Tiêu đề</h5>
+                <p class="text-muted" th:text="${#temporals.format(blog.createdAt, 'dd/MM/yyyy HH:mm')}">Ngày tạo</p>
+                <p>
+                    <strong>Danh mục:</strong>
+                    <span th:text="${blog.category.name}">Tên danh mục</span>
+                </p>
+                <p th:text="${#strings.abbreviate(blog.content, 150)}">Tóm tắt nội dung</p>
 
-            <div>
-                <a class="btn btn-sm btn-info" th:href="@{/blogs/{id}(id=${blog.id})}">Xem chi tiết</a>
-                <a class="btn btn-sm btn-warning" th:href="@{/blogs/{id}/edit(id=${blog.id})}">Sửa</a>
-                <button class="btn btn-sm btn-danger" data-bs-toggle="modal"
-                        th:data-bs-target="${'#deleteModal_' + blog.id}">Xóa</button>
+                <div>
+                    <a class="btn btn-sm btn-info" th:href="@{/blogs/{id}(id=${blog.id})}">Xem chi tiết</a>
+                    <a class="btn btn-sm btn-warning" th:href="@{/blogs/{id}/edit(id=${blog.id})}">Sửa</a>
+                    <button class="btn btn-sm btn-danger" data-bs-toggle="modal"
+                            th:data-bs-target="${'#deleteModal_' + blog.id}">Xóa</button>
+                </div>
             </div>
         </div>
     </div>
+
+    <!-- Nếu không có bài viết -->
+    <div th:if="${blogs.content.size() == 0}" class="alert alert-info text-center">
+        Không có bài viết nào để hiển thị.
+    </div>
 </div>
 
-<!-- Nếu không có bài viết -->
-<div th:if="${blogs.content.size() == 0}" class="alert alert-info text-center">
-    Không có bài viết nào để hiển thị.
+<!-- Nút tải thêm -->
+<div id="loadMoreContainer" class="text-center mt-4" th:if="${blogs.hasNext()}">
+    <button id="loadMoreBtn" class="btn btn-outline-primary">Tải thêm</button>
+</div>
+
+<!-- Loading spinner -->
+<div id="loadingSpinner" class="text-center mt-4" style="display: none;">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Đang tải...</span>
+    </div>
 </div>
 
 <!-- PHÂN TRANG -->
-<nav th:if="${blogs.totalPages > 1}" class="mt-4">
-    <ul class="pagination justify-content-center">
-        <!-- Previous -->
-        <li class="page-item" th:classappend="${!blogs.hasPrevious()} ? 'disabled'">
-            <a class="page-link"
-               th:href="@{/blogs(page=${blogs.number - 1}, title=${title}, categories=${category})}"
-               aria-label="Previous">
-                <span aria-hidden="true">&laquo;</span>
-            </a>
-        </li>
+<!--<nav th:if="${blogs.totalPages > 1}" class="mt-4">-->
+<!--    <ul class="pagination justify-content-center">-->
+<!--        &lt;!&ndash; Previous &ndash;&gt;-->
+<!--        <li class="page-item" th:classappend="${!blogs.hasPrevious()} ? 'disabled'">-->
+<!--            <a class="page-link"-->
+<!--               th:href="@{/blogs(page=${blogs.number - 1}, title=${title}, categories=${category})}"-->
+<!--               aria-label="Previous">-->
+<!--                <span aria-hidden="true">&laquo;</span>-->
+<!--            </a>-->
+<!--        </li>-->
 
-        <!-- Trang số -->
-        <li class="page-item"
-            th:each="i : ${#numbers.sequence(0, blogs.totalPages - 1)}"
-            th:classappend="${i == blogs.number} ? 'active'">
-            <a class="page-link"
-               th:href="@{/blogs(page=${i}, title=${title}, categories=${category})}"
-               th:text="${i + 1}">1</a>
-        </li>
+<!--        &lt;!&ndash; Trang số &ndash;&gt;-->
+<!--        <li class="page-item"-->
+<!--            th:each="i : ${#numbers.sequence(0, blogs.totalPages - 1)}"-->
+<!--            th:classappend="${i == blogs.number} ? 'active'">-->
+<!--            <a class="page-link"-->
+<!--               th:href="@{/blogs(page=${i}, title=${title}, categories=${category})}"-->
+<!--               th:text="${i + 1}">1</a>-->
+<!--        </li>-->
 
-        <!-- Next -->
-        <li class="page-item" th:classappend="${!blogs.hasNext()} ? 'disabled'">
-            <a class="page-link"
-               th:href="@{/blogs(page=${blogs.number + 1}, title=${title}, categories=${category})}"
-               aria-label="Next">
-                <span aria-hidden="true">&raquo;</span>
-            </a>
-        </li>
-    </ul>
-</nav>
+<!--        &lt;!&ndash; Next &ndash;&gt;-->
+<!--        <li class="page-item" th:classappend="${!blogs.hasNext()} ? 'disabled'">-->
+<!--            <a class="page-link"-->
+<!--               th:href="@{/blogs(page=${blogs.number + 1}, title=${title}, categories=${category})}"-->
+<!--               aria-label="Next">-->
+<!--                <span aria-hidden="true">&raquo;</span>-->
+<!--            </a>-->
+<!--        </li>-->
+<!--    </ul>-->
+<!--</nav>-->
 
 <!-- Modal xác nhận xóa -->
 <div th:each="blog : ${blogs.content}">
@@ -142,5 +168,173 @@
     }, 3000);
 </script>
 
+<script>
+    $(document).ready(function() {
+        let currentPage = 0;
+        let currentSearchTerm = '';
+        let isLoading = false;
+
+        $('#searchBtn').click(function() {
+            performSearch();
+        });
+
+        $('#searchInput').keypress(function(e) {
+            if (e.which == 13) {
+                performSearch();
+            }
+        });
+
+        $('#loadMoreBtn').click(function() {
+            loadMoreBlogs();
+        });
+
+        function performSearch() {
+            currentSearchTerm = $('#searchInput').val().trim();
+            currentPage = 0;
+
+            if (currentSearchTerm === '') {
+                loadMoreBlogs();
+            } else {
+                $.ajax({
+                    url: '/api/ajax/search',
+                    method: 'GET',
+                    data: {
+                        title: currentSearchTerm,
+                        page: currentPage
+                    },
+                    beforeSend: function() {
+                        showLoading();
+                    },
+                    success: function(data) {
+                        displaySearchResults(data);
+                        currentPage = 1;
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Lỗi tìm kiếm:', error);
+                        hideLoading();
+                        alert('Có lỗi xảy ra khi tìm kiếm!');
+                    }
+                });
+            }
+        }
+
+        function loadMoreBlogs() {
+            if (isLoading) return;
+
+            isLoading = true;
+            showLoading();
+
+            let url = currentSearchTerm === '' ? '/api/ajax/load-more' : '/api/ajax/search';
+            let data = { page: currentPage };
+
+            if (currentSearchTerm !== '') {
+                data.title = currentSearchTerm;
+            }
+
+            $.ajax({
+                url: url,
+                method: 'GET',
+                data: data,
+                success: function(response) {
+                    if (currentPage === 0) {
+                        displaySearchResults(response);
+                    } else {
+                        appendBlogs(response);
+                    }
+                    currentPage++;
+                    updateLoadMoreButton(response);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Lỗi tải thêm:', error);
+                    alert('Có lỗi xảy ra khi tải thêm bài viết!');
+                },
+                complete: function() {
+                    hideLoading();
+                    isLoading = false;
+                }
+            });
+        }
+
+        function displaySearchResults(data) {
+            let html = '';
+
+            if (data && data.length > 0) {
+                html += '<div class="list-group">';
+                data.forEach(function(blog) {
+                    html += createBlogHtml(blog);
+                });
+                html += '</div>';
+            } else {
+                html = '<div class="alert alert-info text-center">Không tìm thấy bài viết nào phù hợp.</div>';
+            }
+
+            $('#blogList').html(html);
+            updateLoadMoreButton(data);
+        }
+
+        function appendBlogs(data) {
+            if (data && data.length > 0) {
+                let html = '';
+                data.forEach(function(blog) {
+                    html += createBlogHtml(blog);
+                });
+                $('#blogList .list-group').append(html);
+            }
+        }
+
+        function createBlogHtml(blog) {
+            let content = blog.content.length > 150 ? blog.content.substring(0, 150) + '...' : blog.content;
+            let createdAt = new Date(blog.createdAt).toLocaleDateString('vi-VN') + ' ' +
+                new Date(blog.createdAt).toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'});
+
+            return `
+            <div class="list-group-item mb-3">
+                <h5>${blog.title}</h5>
+                <p class="text-muted">${createdAt}</p>
+                <p><strong>Danh mục:</strong> ${blog.category ? blog.category.name : 'Không phân loại'}</p>
+                <p>${content}</p>
+                <div>
+                    <a class="btn btn-sm btn-info" href="/blogs/${blog.id}">Xem chi tiết</a>
+                    <a class="btn btn-sm btn-warning" href="/blogs/${blog.id}/edit">Sửa</a>
+                    <button class="btn btn-sm btn-danger" onclick="deleteBlog(${blog.id}, '${blog.title}')">Xóa</button>
+                </div>
+            </div>
+        `;
+        }
+
+        function updateLoadMoreButton(data) {
+            if (data && data.length === 20) {
+                $('#loadMoreContainer').show();
+            } else {
+                $('#loadMoreContainer').hide();
+            }
+        }
+
+        function showLoading() {
+            $('#loadingSpinner').show();
+            $('#loadMoreBtn').prop('disabled', true);
+        }
+
+        function hideLoading() {
+            $('#loadingSpinner').hide();
+            $('#loadMoreBtn').prop('disabled', false);
+        }
+
+        window.deleteBlog = function(id, title) {
+            if (confirm('Bạn có chắc chắn muốn xóa bài "' + title + '" không?')) {
+                $.ajax({
+                    url: '/blogs/' + id + '/delete',
+                    method: 'POST',
+                    success: function() {
+                        location.reload();
+                    },
+                    error: function() {
+                        alert('Có lỗi xảy ra khi xóa bài viết!');
+                    }
+                });
+            }
+        };
+    });
+</script>
 </body>
 </html>

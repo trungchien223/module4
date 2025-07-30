@@ -29,7 +29,7 @@ public class BlogController {
                              @RequestParam(name = "page", defaultValue = "0") int page,
                              @RequestParam(name = "categories", required = false, defaultValue = "") String category,
                              @RequestParam(name = "title", required = false, defaultValue = "") String title) {
-        int size = 2;
+        int size = 5;
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
         Pageable pageable = PageRequest.of(page, size, sort);
 
